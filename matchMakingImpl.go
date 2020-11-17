@@ -3,19 +3,19 @@ package main
 import (
 	"fmt"
 	"math"
+	"sync"
 )
 
 var playerMap map[string]Player
 var teamMap map[string]Team
 var playerLookUp map[string]Player
 var exists = struct{}{}
-var lock int
+var mu sync.Mutex
 
 func startMatchMaking() {
 	playerMap = make(map[string]Player)
 	teamMap = make(map[string]Team)
 	playerLookUp = make(map[string]Player)
-	lock = 1
 }
 
 func newPlayer(p Player) *Player {
@@ -27,48 +27,40 @@ func newTeam(t Team) *Team {
 }
 
 func (player *Player) addMatchMakingRequest() {
-	for lock != 1 {
-	}
-	lock = 0
+	mu.Lock()
 	if _, exist := playerMap[player.playerID]; exist {
 		return
 	}
 
 	playerMap[player.playerID] = *player
-	lock = 1
+	mu.Unlock()
 }
 
 func (team *Team) addMatchMakingRequest() {
-	for lock != 1 {
-	}
-	lock = 0
+	mu.Lock()
 	if _, exist := teamMap[team.teamID]; exist {
 		return
 	}
 
 	teamMap[team.teamID] = *team
-	lock = 1
+	mu.Unlock()
 }
 
 func (player *Player) addTeamBuildingRequest() {
-	for lock != 1 {
-	}
-	lock = 0
+	mu.Lock()
 	if _, exist := playerLookUp[player.playerID]; exist {
 		return
 	}
 
 	playerLookUp[player.playerID] = *player
-	lock = 1
+	mu.Unlock()
 }
 
 //assuming team size will be a constant = 3
 func buildTeam() {
 	go func() {
 		for {
-			for lock != 1 {
-			}
-			lock = 0
+			mu.Lock()
 
 			for key, player := range playerLookUp {
 				size := 1
@@ -110,7 +102,7 @@ func buildTeam() {
 					break
 				}
 			}
-			lock = 1
+			mu.Unlock()
 		}
 	}()
 }
@@ -118,9 +110,7 @@ func buildTeam() {
 func computeMatchesForPlayers() {
 	go func() {
 		for {
-			for lock != 1 {
-			}
-			lock = 0
+			mu.Lock()
 
 			for key, player := range playerMap {
 				matched := false
@@ -143,7 +133,7 @@ func computeMatchesForPlayers() {
 					delete(playerMap, player.playerID)
 				}
 			}
-			lock = 1
+			mu.Unlock()
 		}
 	}()
 }
@@ -151,9 +141,7 @@ func computeMatchesForPlayers() {
 func computeMatchesForTeams() {
 	go func() {
 		for {
-			for lock != 1 {
-			}
-			lock = 0
+			mu.Lock()
 			for key, team := range teamMap {
 				matched := false
 				for key1, team1 := range teamMap {
@@ -175,15 +163,19 @@ func computeMatchesForTeams() {
 					delete(teamMap, team.teamID)
 				}
 			}
-			lock = 1
+			mu.Unlock()
 		}
 	}()
 }
 
 func (player *Player) removeMatchMakingRequest() {
+	mu.Lock()
 	delete(playerMap, player.playerID)
+	mu.Unlock()
 }
 
 func (team *Team) removeMatchMakingRequest() {
+	mu.Lock()
 	delete(teamMap, team.teamID)
+	mu.Unlock()
 }
