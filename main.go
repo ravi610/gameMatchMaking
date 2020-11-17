@@ -97,7 +97,7 @@ func main() {
 		playerIDs:   []string{"1", "2", "3"},
 		gameID:      "chess",
 		gameType:    "multiPlayer",
-		rating:      1200,
+		rating:      1300,
 		requestTime: 1605607168,
 	})
 

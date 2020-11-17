@@ -167,6 +167,7 @@ func computeMatchesForTeams() {
 
 				if matched == true {
 					delete(teamMap, team.teamID)
+					break
 				}
 			}
 			mu.Unlock()
