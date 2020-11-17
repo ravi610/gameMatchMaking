@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"sync"
+	"time"
 )
 
 var playerMap map[string]Player
@@ -88,11 +89,12 @@ func buildTeam() {
 
 				if size == 3 {
 					team := Team{
-						teamID:    String(6),
-						playerIDs: list,
-						gameID:    player.gameID,
-						gameType:  player.gameType,
-						rating:    avgRating,
+						teamID:      String(6),
+						playerIDs:   list,
+						gameID:      player.gameID,
+						gameType:    player.gameType,
+						rating:      avgRating,
+						requestTime: time.Now().Unix(),
 					}
 					teamMap[team.teamID] = team
 
@@ -120,8 +122,10 @@ func computeMatchesForPlayers() {
 					}
 
 					ratingDiff := player.rating - player1.rating
+					now := time.Now().Unix()
+					timeDiff := float64(now - player.requestTime)
 
-					if math.Abs(float64(ratingDiff)) <= 100.00 {
+					if math.Abs(float64(ratingDiff)) <= (100.00 + 0.1*timeDiff) {
 						fmt.Printf("player 1 : %v and player 2 : %v got matched \n", player.playerID, player1.playerID)
 						delete(playerMap, player1.playerID)
 						matched = true
@@ -150,8 +154,10 @@ func computeMatchesForTeams() {
 					}
 
 					ratingDiff := team.rating - team1.rating
+					now := time.Now().Unix()
+					timeDiff := float64(now - team.requestTime)
 
-					if math.Abs(float64(ratingDiff)) <= 100.00 {
+					if math.Abs(float64(ratingDiff)) <= (100.00 + 0.1*timeDiff) {
 						fmt.Printf("team 1 : %v and team 2 : %v got matched \n", team.teamID, team1.teamID)
 						delete(teamMap, team1.teamID)
 						matched = true
