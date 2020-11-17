@@ -70,7 +70,7 @@ func buildTeam() {
 				list[0] = player.playerID
 
 				for key1, player1 := range playerLookUp {
-					if key == key1 {
+					if key == key1 || player.gameID != player1.gameID || player.gameType != player1.gameType {
 						continue
 					}
 
@@ -117,11 +117,12 @@ func computeMatchesForPlayers() {
 			for key, player := range playerMap {
 				matched := false
 				for key1, player1 := range playerMap {
-					if key == key1 {
+					if key == key1 || player.gameID != player1.gameID || player.gameType != player1.gameType {
 						continue
 					}
 
 					ratingDiff := player.rating - player1.rating
+					//now is current epoch in seconds
 					now := time.Now().Unix()
 					timeDiff := float64(now - player.requestTime)
 
@@ -149,11 +150,12 @@ func computeMatchesForTeams() {
 			for key, team := range teamMap {
 				matched := false
 				for key1, team1 := range teamMap {
-					if key == key1 {
+					if key == key1 || team.gameID != team1.gameID || team.gameType != team1.gameType {
 						continue
 					}
 
 					ratingDiff := team.rating - team1.rating
+					//now is current epoch in seconds
 					now := time.Now().Unix()
 					timeDiff := float64(now - team.requestTime)
 
@@ -177,12 +179,18 @@ func computeMatchesForTeams() {
 
 func (player *Player) removeMatchMakingRequest() {
 	mu.Lock()
+	if _, exist := playerMap[player.playerID]; !exist {
+		return
+	}
 	delete(playerMap, player.playerID)
 	mu.Unlock()
 }
 
 func (team *Team) removeMatchMakingRequest() {
 	mu.Lock()
+	if _, exist := teamMap[team.teamID]; !exist {
+		return
+	}
 	delete(teamMap, team.teamID)
 	mu.Unlock()
 }

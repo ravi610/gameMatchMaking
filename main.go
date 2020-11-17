@@ -71,7 +71,7 @@ func main() {
 	player11 := newPlayer(Player{
 		playerID:    "1",
 		gameID:      "chess",
-		gameType:    "singlePlayer",
+		gameType:    "multiPlayer",
 		rating:      1200,
 		requestTime: 1605607168,
 	})
@@ -79,7 +79,7 @@ func main() {
 	player12 := newPlayer(Player{
 		playerID:    "2",
 		gameID:      "chess",
-		gameType:    "singlePlayer",
+		gameType:    "multiPlayer",
 		rating:      1250,
 		requestTime: 1605607168,
 	})
@@ -87,7 +87,7 @@ func main() {
 	player13 := newPlayer(Player{
 		playerID:    "3",
 		gameID:      "chess",
-		gameType:    "singlePlayer",
+		gameType:    "multiPlayer",
 		rating:      1250,
 		requestTime: 1605607168,
 	})
